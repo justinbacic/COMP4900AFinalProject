@@ -1,4 +1,4 @@
-classdef sender < handle
+classdef sender < communicator
     % parent class for Alice and Bob
     properties
         %rectilinear basis and diagonal basis angles
