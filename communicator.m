@@ -4,10 +4,11 @@ classdef communicator < handle
         clifford_gates = {}
         block_size = 0
         sign_size = 0
+        functions = functionsContainer;
     end
     methods
         %Seeds the communicators random number generator
-        function setSeed(seed)
+        function setSeed(obj, seed)
             rng(seed)
         end
         function setBlockSize(obj, n)
