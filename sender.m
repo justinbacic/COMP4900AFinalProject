@@ -4,15 +4,18 @@ classdef sender < communicator
     end
     methods
         function encrypted_message = encrypt(obj, codeword)
-            % Define the permutation
-            p = randperm(length(codeword)); 
-            % Function to generate swap gates
-            swapList = obj.functions.permutationToSwapGates(p);
-            % Apply the swap gates sequentially
-            for i = 1:size(swapList, 1)
-                codeword = obj.functions.applySwapGate(codeword, swapList(i).TargetQubits(1), swapList(i).TargetQubits(2));
+            cliffordEncrypt = obj.clifford_gates{1};
+            p = obj.permutations(1, :);
+            swap_gates = obj.functions.permutationToSwapGates(p);
+            gates = [swap_gates; cliffordEncrypt; ];
+            C = quantumCircuit(gates);
+            encrypted_message = {};
+            for i = 1:length(codeword)
+                s = simulate(C,codeword(i));
+                encrypted_message{end+1} = s; 
+                %disp(formula(s));
             end
-            encrypted_message = codeword;
+            
         end
     end
 end

@@ -3,8 +3,11 @@ classdef sender < communicator
         
     end
     methods
-        function encrypted_message = encrypt()
-            pre
+        function encrypted_message = encrypt(obj, codeword)
+            cliffordEncrypt = obj.clifford_gates{1};
+            swap_gates = objfunctions.permutationToSwapGates(p);
+            gates = [swap_gates; cliffordEncrypt; ];
+            C = quantumCircuit(gates);
         end
     end
 end

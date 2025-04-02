@@ -9,6 +9,9 @@ classdef communicator < handle
         seed = 0;
     end
     methods
+        function setPermSet(obj)
+            obj.permutations = perms(1:obj.block_size);
+        end
         %Seeds the communicators random number generator
         function setSeed(obj, seed)
             rng(seed)

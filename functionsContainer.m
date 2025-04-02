@@ -1,6 +1,5 @@
 classdef functionsContainer
    methods
-              
         % Function to simulate a swap gate for testing
         function swappedWord = applySwapGate(obj,codeword, i, j)
             swappedWord = codeword;
@@ -15,7 +14,6 @@ classdef functionsContainer
         function DecryptedClifford = decrypt_clifford(obj,EncryptedClifford)
             % Reverse the gate order
             DecryptedClifford = flipud(EncryptedClifford);
-            disp(DecryptedClifford)
             % Loop through each gate and modify it if needed
             for i = 1:length(DecryptedClifford)
                 gate = DecryptedClifford(i); %Get the current gate
