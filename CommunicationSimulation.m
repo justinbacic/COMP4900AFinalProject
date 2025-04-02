@@ -1,5 +1,18 @@
+nQubits = 3;
+signature_size = 1;
+numCliffords = 1;
 Bob = sender;
+Alice = receiver;
 seed = 2;
 Bob.setSeed(seed);
-codeword = ['D', 'O', 'G', 'S','C','H','I','L','L','I','N','!'];
-encrypted = Bob.encrypt(codeword)
+Alice.setSeed(seed);
+Bob.makeCliffordGates();
+Alice.makeCliffordGates();
+disp(Bob.clifford_gates);
+disp(Alice.clifford_gates);
+gates = [ Bob.clifford_gates{1}];
+C = quantumCircuit(gates);
+plot(C);
+gates = [ Alice.clifford_gates{1}];
+C = quantumCircuit(gates);
+plot(C);

@@ -1,0 +1,10 @@
+classdef sender < communicator
+    properties
+        
+    end
+    methods
+        function encrypted_message = encrypt()
+            pre
+        end
+    end
+end

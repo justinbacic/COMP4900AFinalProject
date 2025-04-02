@@ -8,23 +8,31 @@ classdef functionsContainer
             swappedWord(i) = swappedWord(j);
             swappedWord(j) = temp;
         end
-        
-        function reversedSwapGates = reverseSwapGates(obj,swapList)
-            reversedSwapGates = flipud(swapList);
-        end
-        function DecryptedClifford = decrypt_clifford(obj,EncryptedClifford)
-            % Reverse the gate order
-            DecryptedClifford = flipud(EncryptedClifford);
-            disp(DecryptedClifford)
-            % Loop through each gate and modify it if needed
-            for i = 1:length(DecryptedClifford)
-                gate = DecryptedClifford(i); %Get the current gate
-                if strcmp(gate.Type, "s")
-                    DecryptedClifford(i) = siGate(gate.TargetQubits);
-                end
-                % hGate and cxGate remain unchanged
+        function permutationInverse = invert_permutation(obj, p)
+            n = length(p);
+            %Create an array of the same size as the original permutation
+            permutationInverse = zeros(1, n);
+            %to invert a mapping of x to y we do y to x
+            for y = 1:n
+                x = p(y); %x is at position y
+                permutationInverse(x) = y; %put y at position x
             end
         end
+        
+        
+function DecryptedClifford = decrypt_clifford(EncryptedClifford)
+    % Reverse the gate order
+    DecryptedClifford = flipud(EncryptedClifford);
+    disp(DecryptedClifford)
+    % Loop through each gate and modify it if needed
+    for i = 1:length(DecryptedClifford)
+        gate = DecryptedClifford(i); %Get the current gate
+        if strcmp(gate.Type, "s")
+            DecryptedClifford(i) = siGate(gate.TargetQubits);
+        end
+        % hGate and cxGate remain unchanged
+    end
+end
         % function to turn a qubit permutation into a set of transpositions to fit
         % it into the swapGate function
         function swapList = permutationToSwapGates(obj, p)

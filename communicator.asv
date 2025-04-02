@@ -2,17 +2,14 @@ classdef communicator < handle
     properties
         permutations = {}
         clifford_gates = {}
-        block_size = 4
+        block_size = 0
         sign_size = 0
-        num_cliffords = 1
-        functions = functionsContainer
-        seed = 0;
+        functions = functionsContainer;
     end
     methods
         %Seeds the communicators random number generator
         function setSeed(obj, seed)
             rng(seed)
-            obj.seed = seed;
         end
         function setBlockSize(obj, n)
             obj.block_size = n;
@@ -22,11 +19,15 @@ classdef communicator < handle
         end
         function swapGates = makeSwapGates(obj)
             p=randperm(obj.block_size);
-            swapGates = obj.functions.permutationToSwapGates(p);
+            swapGates = functions.permutationToSwapGates(p);
         end
-        function makeCliffordGates(obj)
+        function cliffordSet = makeCliffordGates(obj)
+            
             % Generate a random Clifford circuit
-            obj.clifford_gates = obj.functions.generate_unique_cliffords(obj.block_size, obj.num_cliffords,obj.seed);
+            CliffordSet = generate_unique_cliffords(nQubits, numCliffords);
+            cliffordEncrypt = CliffordSet{1};
+            %ig = initGate(1:2, "10");
+
         end
     end
 end
