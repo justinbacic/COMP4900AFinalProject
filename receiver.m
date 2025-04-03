@@ -4,6 +4,9 @@ classdef receiver < communicator
         
     end
     methods
+        function obj = receiver()
+            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
+        end
         function plain_text = binaryToMessage(obj,binaryMessage)
             str = "";
             for i=1:length(binaryMessage)
@@ -45,15 +48,16 @@ classdef receiver < communicator
             
             decoded_message = {};
             for i = 1:length(encrypted_message)
-                DecryptedCircuit = obj.functions.decrypt_clifford(obj.clifford_gates{1}); 
+                DecryptedCircuit = obj.functions.decrypt_clifford(obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))}); 
                 cliffordDecrypt = DecryptedCircuit;
-                p = obj.permutations(1, :);
+                p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
                 rev_swap_gates = obj.functions.reverseSwapGates(swap_gates);
                 gates = [cliffordDecrypt; rev_swap_gates;];
                 D = quantumCircuit(gates);
                 s = simulate(D,encrypted_message{i});
-                disp(formula(s));
+                %disp(randi(10));
+                %disp(formula(s));
                 %Measurement
                 decoded_message{end +1} = randsample(s,1).MeasuredStates;
             end

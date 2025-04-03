@@ -3,6 +3,10 @@ classdef sender < communicator
         
     end
     methods
+        function obj = sender()
+            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
+            
+        end
         function binary_array = messageToBinary(obj, message)
             % Extract the char array from the string
             charArray = char(message);
@@ -32,9 +36,8 @@ classdef sender < communicator
         function encrypted_message = encrypt(obj, codeword)
             encrypted_message = {};
             for i = 1:length(codeword)
-                cliffordEncrypt = obj.clifford_gates{1};
-                disp(randi(obj.num_cliffords));
-                p = obj.permutations(1, :);
+                cliffordEncrypt = obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))};
+                p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
                 gates = [swap_gates; cliffordEncrypt; ];
                 C = quantumCircuit(gates);
