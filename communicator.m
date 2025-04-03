@@ -4,7 +4,7 @@ classdef communicator < handle
         clifford_gates = {}
         block_size = 4
         sign_size = 0
-        num_cliffords = 1
+        num_cliffords = 3
         functions = functionsContainer
         seed = 0;
     end
