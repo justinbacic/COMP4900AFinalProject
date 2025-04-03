@@ -30,14 +30,14 @@ classdef sender < communicator
             end
         end
         function encrypted_message = encrypt(obj, codeword)
-            cliffordEncrypt = obj.clifford_gates{1};
-            disp(randi(obj.num_cliffords));
-            p = obj.permutations(1, :);
-            swap_gates = obj.functions.permutationToSwapGates(p);
-            gates = [swap_gates; cliffordEncrypt; ];
-            C = quantumCircuit(gates);
             encrypted_message = {};
             for i = 1:length(codeword)
+                cliffordEncrypt = obj.clifford_gates{1};
+                disp(randi(obj.num_cliffords));
+                p = obj.permutations(1, :);
+                swap_gates = obj.functions.permutationToSwapGates(p);
+                gates = [swap_gates; cliffordEncrypt; ];
+                C = quantumCircuit(gates);
                 s = simulate(C,codeword(i));
                 encrypted_message{end+1} = s; 
                 %disp(formula(s));
