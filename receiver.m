@@ -3,10 +3,8 @@ classdef receiver < communicator
         
     end
     methods
-        function obj = receiver()
-            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
-            obj.setPermSet();
-            obj.makeCliffordGates();
+        function obj = receiver(seed)
+            obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
         end
         function plain_text = binaryToMessage(obj,binaryMessage)
             str = "";

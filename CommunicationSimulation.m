@@ -36,8 +36,8 @@ for idx = 1:length(n_values)
     fprintf('\nTesting with n=%d, d1=%d, d2=%d\n', n, d1, d2);
     
     % Set up sender and receiver explicitly
-    Alice = sender();
-    Bob = receiver();
+    Alice = sender(42);
+    Bob = receiver(42);
 
     % Configure sender and receiver explicitly
     Alice.setBlockSize(n + ell);
