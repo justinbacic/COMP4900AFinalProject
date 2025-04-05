@@ -1,10 +1,17 @@
 classdef receiver < communicator
-    % parent class for Alice and Bob
     properties
         
     end
     methods
+        function obj = receiver()
+            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
+        end
         function plain_text = binaryToMessage(obj,binaryMessage)
+            str = "";
+            for i=1:length(binaryMessage)
+                str = str +binaryMessage(i);
+            end
+            disp(str);
             % Converts a binary char array back to a text string
             %
             % Inputs:
@@ -13,19 +20,19 @@ classdef receiver < communicator
             %
             % Output:
             %   textStr      - Reconstructed string (e.g., 'He')
-            binaryStr = char(binaryMessage);
+            binaryStr = char(str);
             bitsPerChar = 8; % Default to ASCII (8 bits)
         
             % Ensure input is a char array of '0's and '1's
             if ~ischar(binaryStr) || any(~ismember(binaryStr, '01'))
                 error('Input must be a char array of ''0''s and ''1''s.');
             end
-        
-            % Pad with zeros if length is not a multiple of bitsPerChar
+            
+            %truncate extra
             if mod(length(binaryStr), bitsPerChar) ~= 0
-                padding = bitsPerChar - mod(length(binaryStr), bitsPerChar);
-                binaryStr = [binaryStr, repmat('0', 1, padding)];
-                warning('Input padded with %d zeros to match bit grouping.', padding);
+                extraBits = mod(length(binaryStr), bitsPerChar);
+                binaryStr = binaryStr(1:end-extraBits); % Truncate the extra bits
+                warning('Input truncated by %d bits to match bit grouping.', extraBits);
             end
         
             % Split binary into chunks of 'bitsPerChar' bits
@@ -37,37 +44,34 @@ classdef receiver < communicator
             plain_text = char(decimalValues)';
         end
         function decoded_message = decode(obj,encrypted_message)
-            DecryptedCircuit = obj.functions.decrypt_clifford(obj.clifford_gates{1}); 
-            cliffordDecrypt = DecryptedCircuit;
-            p = obj.permutations(1, :);
-            swap_gates = obj.functions.permutationToSwapGates(p);
-            rev_swap_gates = obj.functions.reverseSwapGates(swap_gates);
-            gates = [cliffordDecrypt; rev_swap_gates;];
-            D = quantumCircuit(gates);
-            decoded_message = {}
+            authBits = "";
+            for i = 1:obj.sign_size
+                authBits = "1" + authBits;
+            end
+            decoded_message = {};
             for i = 1:length(encrypted_message)
+                DecryptedCircuit = obj.functions.decrypt_clifford(obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))}); 
+                cliffordDecrypt = DecryptedCircuit;
+                p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
+                swap_gates = obj.functions.permutationToSwapGates(p);
+                rev_swap_gates = obj.functions.reverseSwapGates(swap_gates);
+                gates = [cliffordDecrypt; rev_swap_gates;];
+                D = quantumCircuit(gates);
                 s = simulate(D,encrypted_message{i});
-                bits = measureQuantumState(s);
-                
-                disp(formula(s)); 
-            end
-        end
-        function measuredBits = measureQuantumState(obj,state)
-            binaryStrings = generateBinaryStrings(obj.block_size+obj.sign_size);
-            measuredBits = ""
-            for i=1:length(binaryStrings)
-                p = probability(state,(1:(obj.block_size+obj.sign_size)))
-                if p == 1
-                    measuredBits = binaryStrings(i)
+                %disp(randi(10));
+                %disp(formula(s));
+                %Measurement
+                Measured = randsample(s,1).MeasuredStates;
+
+                % Check the authentication bits: they should all be 1s
+                authPart = Measured(end-1:end);
+                disp(strlength(Measured))
+                if ~isequal(authPart, authBits)
+                    error('Authentication failed: invalid authentication bits.');
                 end
+                decoded_message{end + 1} = decryptedBlock(1:obj.block_size);
             end
         end
-        function binaryStrings = generateBinaryStrings(obj, n)
-            % Generates all binary strings of length n
-            % Output: A matrix where each row is a binary string
-            
-            numStrings = 2^n; % Total number of binary strings
-            binaryStrings = dec2bin(0:numStrings-1) - '0'; % Generate and convert to numeric matrix
-        end
+        
     end
 end

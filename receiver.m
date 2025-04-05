@@ -1,5 +1,4 @@
 classdef receiver < communicator
-    % parent class for Alice and Bob
     properties
         
     end
@@ -45,7 +44,10 @@ classdef receiver < communicator
             plain_text = char(decimalValues)';
         end
         function decoded_message = decode(obj,encrypted_message)
-            
+            authBits = "";
+            for i = 1:obj.sign_size
+                authBits = "1" + authBits;
+            end
             decoded_message = {};
             for i = 1:length(encrypted_message)
                 DecryptedCircuit = obj.functions.decrypt_clifford(obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))}); 
@@ -59,7 +61,14 @@ classdef receiver < communicator
                 %disp(randi(10));
                 %disp(formula(s));
                 %Measurement
-                decoded_message{end +1} = randsample(s,1).MeasuredStates;
+                Measured = randsample(s,1).MeasuredStates;
+                Measured = char(Measured);
+                % Check the authentication bits: they should all be 1s
+                authPart = Measured(end - obj.sign_size + 1 : end);
+                if ~isequal(authPart, authBits)
+                    error('Authentication failed: invalid authentication bits.');
+                end
+                decoded_message{end + 1} = Measured(1:obj.block_size);
             end
         end
         

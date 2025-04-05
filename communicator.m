@@ -2,9 +2,9 @@ classdef communicator < handle
     properties
         permutations = {}
         clifford_gates = {}
-        block_size = 5
-        sign_size = 0
-        num_cliffords = 3
+        block_size = 3;
+        sign_size = 2;
+        num_cliffords = 50;
         functions = functionsContainer
         seed = 0;
         stream;
@@ -25,12 +25,12 @@ classdef communicator < handle
             obj.sign_size = l;
         end
         function swapGates = makeSwapGates(obj)
-            p=randperm(obj.block_size);
+            p=randperm(obj.block_size + obj.sign_size);
             swapGates = obj.functions.permutationToSwapGates(p);
         end
         function makeCliffordGates(obj)
             % Generate a random Clifford circuit
-            obj.clifford_gates = obj.functions.generate_unique_cliffords(obj.block_size, obj.num_cliffords,randi(obj.stream,10));
+            obj.clifford_gates = obj.functions.generate_unique_cliffords(obj.block_size + obj.sign_size, obj.num_cliffords,randi(obj.stream,10));
         end
         function val = makeRandVal(obj)
             val = randi(obj.stream, 10);

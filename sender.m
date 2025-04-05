@@ -20,9 +20,10 @@ classdef sender < communicator
             binaryMessage = string(binaryStr(:)');
             binary_array = [];
             while strlength(binaryMessage)>= obj.block_size
-                chunk = extractBefore(binaryMessage, obj.block_size+1); % Extracts up to index n
-                binaryMessage = extractAfter(binaryMessage, obj.block_size);    % Extracts from index n+1
-                binary_array = [binary_array;chunk];
+                chunk = extractBefore(binaryMessage, obj.block_size+1);
+                binaryMessage = extractAfter(binaryMessage, obj.block_size);
+                fullBlock = chunk;
+                binary_array = [binary_array; fullBlock];
             end
             if strlength(binaryMessage) > 0
                 last_chunk = "";
@@ -35,13 +36,21 @@ classdef sender < communicator
         end
         function encrypted_message = encrypt(obj, codeword)
             encrypted_message = {};
+            %create set of authentication bits
+            authBits = "";
+            for i = 1:obj.sign_size
+                authBits = "1" + authBits;
+            end
             for i = 1:length(codeword)
                 cliffordEncrypt = obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))};
                 p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
                 gates = [swap_gates; cliffordEncrypt; ];
                 C = quantumCircuit(gates);
-                s = simulate(C,codeword(i));
+                authenticatedCode = codeword(i) + authBits;
+                %disp(authenticatedCode)
+                %plot(C)
+                s = simulate(C,authenticatedCode);
                 encrypted_message{end+1} = s; 
                 %disp(formula(s));
             end
