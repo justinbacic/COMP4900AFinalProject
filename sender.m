@@ -5,7 +5,8 @@ classdef sender < communicator
     methods
         function obj = sender()
             obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
-            
+            obj.setPermSet();
+            obj.makeCliffordGates();
         end
         function binary_array = messageToBinary(obj, message)
             % Extract the char array from the string
