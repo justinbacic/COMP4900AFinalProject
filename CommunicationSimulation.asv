@@ -59,19 +59,14 @@ for idx = 1:length(n_values)
         random_message = dec2bin(randi([0, 2^(n)-1]), n);
         codeword = Alice.messageToBinary(random_message);
         encrypted_msg = Alice.encrypt(codeword);
-        encrypted_msg_string = "";
-        for i=1:length(encrypted_msg)
-            encrypted_msg_string = encrypted_msg_string + formula(encrypted_msg{i});
-        end
-        encrypted_signature = strjoin(encrypted_msg_string, '') %Need to find valid way to write
+        encrypted_signature = strjoin(formencrypted_msg, ''); %Need to find valid way to write
         % Check explicitly for collision
-        if any(strcmp(encrypted_outcomes, encrypted_signature))
+        if any(strcmp(encrypted_outcomes, enc_signature))
             collision_count = collision_count + 1;
         else
-            encrypted_outcomes = [encrypted_outcomes; encrypted_signature]; % explicitly add
+            encrypted_outcomes = [encrypted_outcomes; enc_signature]; % explicitly add
         end
     end
-    disp(collision_count);
     % Need to ensure below works
     % Compute explicit empirical collision probability
     collision_counts = cell2mat(values(encrypted_outcomes));
