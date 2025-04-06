@@ -1,103 +1,87 @@
-%nQubits = 4;
-%signature_size = 1;
-%numCliffords = 1;
-%Bob = sender;
-%Alice = receiver;
-%seed = 2;
-%Bob.setSeed(seed);
-%Alice.setSeed(seed);
-%Bob.makeCliffordGates();
-%Alice.makeCliffordGates();
-%disp(Bob.clifford_gates);
-%disp(Alice.clifford_gates);
-%gates = [ Bob.clifford_gates{1}];
-%C = quantumCircuit(gates);
-%plot(C);
-%gates = [ Alice.clifford_gates{1}];
-%D = quantumCircuit(gates);
-%plot(D);
-
-clear; clc;
-
-% Parameters exactly like in paper
-n_values = [2, 3, 4, 5]; % Block sizes
-d1_values = [56, 17, 6, 3]; % Clifford operators
+% Parameters as given in your scenario
+n_values = [2, 3, 4, 5, 6]; % Block sizes
+d1_values = [56 17 6 3 3]; % Clifford operators
+%d2_values = [ 56 17 6 3 3]; % NOT EVEN IMPLEMENTED???
 ell = 2; % Authentication bits
+empirical_collision_results = {};
+trial_count = 1; %set accordingly
+inc = 5; %i increment factor
 
-empirical_collision_probs = zeros(length(n_values),1);
-theoretical_collision_probs = zeros(length(n_values),1);
+Alice = sender();
 
-for idx = 1:length(n_values)
+for trial = 1:trial_count
+    for idx = 1:2
     n = n_values(idx);
     d1 = d1_values(idx);
     d2 = factorial(n + ell);
-    imax = floor(sqrt(2^(n+ell) * d1 * d2));
-    fprintf('\nTesting with n=%d, d1=%d, d2=%d\n', n, d1, d2);
+    imax = floor(sqrt(2^(n + ell) * d1 * d2));
     
-    % Set up sender and receiver explicitly
-    Alice = sender();
-    %Bob = receiver();
-
-    % Configure sender and receiver explicitly
+    fprintf('Testing n=%d | d1=%d | d2=%d | imax=%d trials\n', n, d1, d2, imax);
     Alice.setBlockSize(n);
     Alice.setSignSize(ell);
     Alice.num_cliffords = d1;
     Alice.setPermSet();
+    %Alice.num_permutations = d2;
     Alice.makeCliffordGates();
-    perms = string(dec2bin(0:2^(n) - 1));
-    disp(perms)
     
-    %Bob.setBlockSize(n);
-    %Bob.setSignSize(ell);
-    %Bob.num_cliffords = d1;
-    %Bob.setPermSet();
-    %Bob.clifford_gates = Alice.clifford_gates 
-    encrypted_outcomes = [];
-    collision_count = 0;
-
-    for trial = 1:imax
-        codeword = perms(trial);
-        disp(imax)
-        %codeword = Alice.messageToBinary(binary_message);
-        encrypted_msg = Alice.encrypt(codeword);
-        %encrypted_signature = strjoin(encrypted_msg, ''); %Need to find valid way to write
-        % Check explicitly for collision
-        encrypted_state = encrypted_msg{1, 1}.Amplitudes;
-        disp(encrypted_state)
-        if any(strcmp(encrypted_outcomes, enc_signature))
-            collision_count = collision_count + 1;
-        else
-            encrypted_outcomes = [encrypted_outcomes; enc_signature]; % explicitly add
+    % Generate all possible plaintexts explicitly
+    possible_plaintexts = dec2bin(0:(2^n - 1), n);
+    num_plaintexts = size(possible_plaintexts, 1);
+    i_vals = 1:inc:imax;
+    %observed_ratio = zeros(1, imax);
+    observed_ratio = zeros(length(i_vals), 2);
+    observed_ratio_accum = zeros(length(i_vals), 1);
+    for iidx = 1:length(i_vals)
+        i = i_vals(iidx);
+        collisions = 0;
+        encrypted_outcomes = {};
+        for j = 1:i
+            % Cycle through all plaintext messages explicitly
+            plaintext_idx = mod(j - 1, num_plaintexts) + 1;
+            plaintext = string(possible_plaintexts(plaintext_idx, :));
+            %disp(plaintext)
+            % Encrypt explicitly
+            encrypted_msg = Alice.encrypt(plaintext);
+        
+            % Capture explicitly the encrypted quantum state signature
+            encrypted_state = encrypted_msg{1}.Amplitudes;
+        
+            % Explicit collision check
+            collision_detected = false;
+            for k = 1:length(encrypted_outcomes)
+                if isequal(encrypted_state, encrypted_outcomes{k})
+                    collisions = collisions + 1;
+                    collision_detected = true;
+                    %disp("Collision!!")
+                    break;
+                end
+            end
+            if ~collision_detected
+                encrypted_outcomes{end+1} = encrypted_state;
+            end
         end
-        matched = false;
-            for j = 1:size(stored, 2)
-        if isequal(x, stored(:, j))
-            count = count + 1;
-            matched = true;
-            break;
-        end
+        observed_ratio(iidx) = observed_ratio(iidx) + (collisions / i);
+        fprintf('Collisions for n=%d | d1=%d | d2=%d | i=%d trials %d\n', n, d1, d2, i, collisions/i)
     end
-    
-    if ~matched
-        stored(:, end+1) = x;
+    averaged_ratio = observed_ratio_accum / trial_count;
+    averaged_ratio = averaged_ratio + eps; %to not make log
+    empirical_collision_results{idx} = [i_vals(:), averaged_ratio];
     end
-    end
-    % Need to ensure below works
-    % Compute explicit empirical collision probability
-    collision_counts = cell2mat(values(encrypted_outcomes));
-    num_collisions = sum(collision_counts .* (collision_counts - 1) / 2);
-    total_pairs = num_trials * (num_trials - 1) / 2;
-    empirical_collision_prob = num_collisions / total_pairs;
-
-    empirical_collision_probs(idx) = empirical_collision_prob;
-
-    % Explicit theoretical collision probability calculation
-    imax = floor( sqrt( 2^(n+ell) * d1 * d2 ) );
-    theoretical_collision_prob = (imax * (imax - 1)) / (2^(n+ell+1) * d1 * d2);
-    theoretical_collision_probs(idx) = theoretical_collision_prob;
-
-    fprintf('Empirical Collision Prob: %.4e | Theoretical: %.4e\n', empirical_collision_prob, theoretical_collision_prob);
 end
 
-% TODO: Plot explicitly empirical vs theoretical collision probabilities
+figure;
+hold on;
 
+plot(empirical_collision_results{1}(:,1), empirical_collision_results{1}(:,2), 'x', 'DisplayName', ['n = 2']);
+plot(empirical_collision_results{2}(:,1), empirical_collision_results{2}(:,2), 'x', 'DisplayName', ['n = 3']);
+plot(empirical_collision_results{3}(:,1), empirical_collision_results{3}(:,2), 'x', 'DisplayName', ['n = 4']);
+plot(empirical_collision_results{4}(:,1), empirical_collision_results{4}(:,2), 'x', 'DisplayName', ['n = 5']);
+plot(empirical_collision_results{5}(:,1), empirical_collision_results{5}(:,2), 'x', 'DisplayName', ['n = 6']);
+
+
+xlabel('i');
+ylabel('Collision ratio');
+set(gca,'YScale','log')
+legend('show');
+title('Collision ratio vs. i for different n');
+hold off;
