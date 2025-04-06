@@ -43,12 +43,12 @@ classdef sender < communicator
             end
             for i = 1:length(codeword)
                 cliffordEncrypt = obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))};
-                p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
+                p = obj.permutations(randi(obj.stream, obj.num_permutations), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
                 gates = [swap_gates; cliffordEncrypt; ];
-                C = quantumCircuit(gates);
-                authenticatedCode = codeword(i) + authBits;
-                %disp(authenticatedCode)
+                C = quantumCircuit(gates, obj.block_size + obj.sign_size);
+                authenticatedCode = string(codeword(i)) + authBits;
+                %disp(codeword(i))
                 %plot(C)
                 s = simulate(C,authenticatedCode);
                 encrypted_message{end+1} = s; 
