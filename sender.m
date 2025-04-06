@@ -4,9 +4,19 @@ classdef sender < communicator
     end
     methods
         function obj = sender()
+            %Seeds the communicators random number generator
             obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
             
         end
+        %function obj = sender(seed,n,l,d1)
+            %Seeds the communicators random number generator
+        %    obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
+            %obj.setBlockSize(n);
+            %obj.setSignSize(l);
+            %obj.num_cliffords = d1;
+            %obj.setPermSet();
+            %obj.makeCliffordGates();
+        %end
         function binary_array = messageToBinary(obj, message)
             % Extract the char array from the string
             charArray = char(message);

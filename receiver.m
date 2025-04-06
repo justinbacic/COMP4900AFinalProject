@@ -6,12 +6,20 @@ classdef receiver < communicator
         function obj = receiver()
             obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
         end
+        %function obj = reciever(seed,n,l,d1)
+            %Seeds the communicators random number generator
+        %    obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
+            %obj.setBlockSize(n);
+            %obj.setSignSize(l);
+            %obj.num_cliffords = d1;
+            %obj.setPermSet();
+            %obj.makeCliffordGates();
+        %end
         function plain_text = binaryToMessage(obj,binaryMessage)
             str = "";
             for i=1:length(binaryMessage)
                 str = str +binaryMessage(i);
             end
-            disp(str);
             % Converts a binary char array back to a text string
             %
             % Inputs:
@@ -32,7 +40,7 @@ classdef receiver < communicator
             if mod(length(binaryStr), bitsPerChar) ~= 0
                 extraBits = mod(length(binaryStr), bitsPerChar);
                 binaryStr = binaryStr(1:end-extraBits); % Truncate the extra bits
-                warning('Input truncated by %d bits to match bit grouping.', extraBits);
+                %warning('Input truncated by %d bits to match bit grouping.', extraBits);
             end
         
             % Split binary into chunks of 'bitsPerChar' bits
