@@ -6,19 +6,13 @@ classdef communicator < handle
         sign_size = 2;
         num_cliffords = 50;
         num_permutations = 0;
-        functions = functionsContainer
-        seed = 0;
+        functions = functionsContainer;
         stream;
     end
     methods
         function setPermSet(obj)
             obj.permutations = perms(1:obj.block_size + obj.sign_size);
             obj.num_permutations = factorial(obj.block_size + obj.sign_size);
-        end
-        %Seeds the communicators random number generator
-        function setSeed(obj, seed)
-            rng(seed)
-            obj.seed = seed;
         end
         function setBlockSize(obj, n)
             obj.block_size = n;
