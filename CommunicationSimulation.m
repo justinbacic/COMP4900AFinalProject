@@ -4,13 +4,13 @@ d1_values = [56 17 6 3 3]; % Clifford operators
 d2_values = [ factorial(2+2) 17 6 3 3]; % Altered for alternative permutation style
 ell = 2; % Authentication bits
 empirical_collision_results = {};
-trial_count = 1; %set accordingly
-inc = 1; %i increment factor
+trial_count = 20; %set accordingly
+inc = 5; %i increment factor
 
 Alice = sender();
 
 for trial = 1:trial_count
-    for idx = 1:2
+    for idx = 1:5
     n = n_values(idx);
     d1 = d1_values(idx);
     d2 = d2_values(idx);
@@ -74,9 +74,9 @@ hold on;
 
 plot(empirical_collision_results{1}(:,1), empirical_collision_results{1}(:,2), 'x', 'DisplayName', ['n = 2']);
 plot(empirical_collision_results{2}(:,1), empirical_collision_results{2}(:,2), 'x', 'DisplayName', ['n = 3']);
-%plot(empirical_collision_results{3}(:,1), empirical_collision_results{3}(:,2), 'x', 'DisplayName', ['n = 4']);
-%plot(empirical_collision_results{4}(:,1), empirical_collision_results{4}(:,2), 'x', 'DisplayName', ['n = 5']);
-%plot(empirical_collision_results{5}(:,1), empirical_collision_results{5}(:,2), 'x', 'DisplayName', ['n = 6']);
+plot(empirical_collision_results{3}(:,1), empirical_collision_results{3}(:,2), 'x', 'DisplayName', ['n = 4']);
+plot(empirical_collision_results{4}(:,1), empirical_collision_results{4}(:,2), 'x', 'DisplayName', ['n = 5']);
+plot(empirical_collision_results{5}(:,1), empirical_collision_results{5}(:,2), 'x', 'DisplayName', ['n = 6']);
 
 
 xlabel('i');

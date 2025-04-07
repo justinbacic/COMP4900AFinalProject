@@ -3,31 +3,23 @@ classdef receiver < communicator
         
     end
     methods
-        function obj = receiver()
-            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
-        end
-        %function obj = reciever(seed,n,l,d1)
-            %Seeds the communicators random number generator
-        %    obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
-            %obj.setBlockSize(n);
-            %obj.setSignSize(l);
-            %obj.num_cliffords = d1;
-            %obj.setPermSet();
-            %obj.makeCliffordGates();
+        %function obj = receiver()
+        %    obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
         %end
+        function obj = receiver(seed,n,l,d1)
+            %Seeds the communicators random number generator
+            obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
+            obj.setBlockSize(n);
+            obj.setSignSize(l);
+            obj.num_cliffords = d1;
+            obj.setPermSet();
+            obj.makeCliffordGates();
+        end
         function plain_text = binaryToMessage(obj,binaryMessage)
             str = "";
             for i=1:length(binaryMessage)
                 str = str +binaryMessage(i);
             end
-            % Converts a binary char array back to a text string
-            %
-            % Inputs:
-            %   binaryStr    - Binary string (e.g., '0100100001100101')
-            %   bitsPerChar  - Optional: Number of bits per character (default: 8)
-            %
-            % Output:
-            %   textStr      - Reconstructed string (e.g., 'He')
             binaryStr = char(str);
             bitsPerChar = 8; % Default to ASCII (8 bits)
         
@@ -63,7 +55,7 @@ classdef receiver < communicator
                 p = obj.permutations(randi(obj.stream, length(obj.permutations)), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
                 rev_swap_gates = obj.functions.reverseSwapGates(swap_gates);
-                gates = [cliffordDecrypt; rev_swap_gates;];
+                gates = [rev_swap_gates;cliffordDecrypt; ];
                 D = quantumCircuit(gates);
                 s = simulate(D,encrypted_message{i});
                 %disp(randi(10));

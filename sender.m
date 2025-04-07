@@ -3,20 +3,20 @@ classdef sender < communicator
         
     end
     methods
-        function obj = sender()
+        %function obj = sender()
             %Seeds the communicators random number generator
-            obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
+        %    obj.stream = RandStream('mt19937ar', 'Seed', 42); % Create independent RNG
             
-        end
-        %function obj = sender(seed,n,l,d1)
-            %Seeds the communicators random number generator
-        %    obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
-            %obj.setBlockSize(n);
-            %obj.setSignSize(l);
-            %obj.num_cliffords = d1;
-            %obj.setPermSet();
-            %obj.makeCliffordGates();
         %end
+        function obj = sender(seed,n,l,d1)
+            %Seeds the communicators random number generator
+            obj.stream = RandStream('mt19937ar', 'Seed', seed); % Create independent RNG
+            obj.setBlockSize(n);
+            obj.setSignSize(l);
+            obj.num_cliffords = d1;
+            obj.setPermSet();
+            obj.makeCliffordGates();
+        end
         function binary_array = messageToBinary(obj, message)
             % Extract the char array from the string
             charArray = char(message);
@@ -55,7 +55,7 @@ classdef sender < communicator
                 cliffordEncrypt = obj.clifford_gates{randi(obj.stream, length(obj.clifford_gates))};
                 p = obj.permutations(randi(obj.stream, obj.num_permutations), :);
                 swap_gates = obj.functions.permutationToSwapGates(p);
-                gates = [swap_gates; cliffordEncrypt; ];
+                gates = [ cliffordEncrypt; swap_gates; ];
                 C = quantumCircuit(gates, obj.block_size + obj.sign_size);
                 authenticatedCode = string(codeword(i)) + authBits;
                 %disp(codeword(i))
