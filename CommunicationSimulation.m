@@ -7,7 +7,7 @@ empirical_collision_results = {};
 trial_count = 20; %set accordingly
 inc = 5; %i increment factor
 
-Alice = sender();
+Alice = sender(42,4,2,50);
 
 for trial = 1:trial_count
     for idx = 1:5
@@ -28,9 +28,7 @@ for trial = 1:trial_count
     possible_plaintexts = dec2bin(0:(2^n - 1), n);
     num_plaintexts = size(possible_plaintexts, 1);
     i_vals = 1:inc:imax;
-    %observed_ratio = zeros(1, imax);
     observed_ratio = zeros(length(i_vals), 1);
-    observed_ratio_accum = zeros(length(i_vals), 1);
     for iidx = 1:length(i_vals)
         i = i_vals(iidx);
         collisions = 0;
@@ -39,7 +37,6 @@ for trial = 1:trial_count
             % Cycle through all plaintext messages explicitly
             plaintext_idx = mod(j - 1, num_plaintexts) + 1;
             plaintext = string(possible_plaintexts(plaintext_idx, :));
-            %disp(plaintext)
             % Encrypt explicitly
             encrypted_msg = Alice.encrypt(plaintext);
         
